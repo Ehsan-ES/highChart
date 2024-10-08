@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    
+    <title>HIGHCHARTS</title>
+</head>
+<body>
+<div style="height: 100vh;" id="container"></div>
+
+    <script>
+        function arrToObj(arr1, arr2){
+                const object = []
+                for(i=0; i < arr1.length;i++){
+                    object.push({name: arr1[i], y: arr2[i]})
+                }
+                return object;
+            }
+
+        function fetchData(){
+            let gameNames = []
+            let gameIndex = []
+
+            fetch("http://127.0.0.1:5000/home")
+                .then(response => {
+                    if (!response.ok){
+                        throw new Error('Network response was not ok', error)
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    console.log(Object(data))
+                    var gameIndices= data.game_indices
+                    for(i=0; i < gameIndices.length;i++){
+                        names = gameIndices[i].version.name
+                        gIndex = gameIndices[i].game_index
+                        gameNames.push(names)
+                        gameIndex.push(gIndex)
+                    }
+
+                    let concat = arrToObj(gameNames, gameIndex)
+                    console.log(concat)
+                    
+                    Highcharts.chart('container', {
+                        chart: {
+                            type: 'pie',
+                            
+                        },
+                        accessibility: {
+                            point: {
+                                valueSuffix: ''
+                            }
+                        },
+                        title: {
+                            text: '2023 Norway car registrations'
+                        },
+                        subtitle: {
+                            text: 'Source: <a href="https://www.ssb.no/transport-og-reiseliv/faktaside/bil-og-transport">SSB</a>'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: <b>{point.y}</b>'
+                        },
+                        legend: {
+                            enabled: true
+                        },
+                        plotOptions: {
+                            series: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                borderRadius: 8,
+                                dataLabels: [{
+                                    enabled: true,
+                                    distance: 20,
+                                    format: '{point.name}'
+                                }, {
+                                    enabled: true,
+                                    distance: -15,
+                                    format: '{point.y}',
+                                    style: {
+                                        fontSize: '0.9em'
+                                    }
+                                }],
+                                showInLegend: true
+                            }
+                        },
+                        series: [{
+                            name: 'Registrations',
+                            colorByPoint: true,
+                            innerSize: '25%',
+                            data: concat
+                        }]
+                    });
+                })
+
+            }
+            fetchData()
+    </script>
+
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script> 
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+
+</body>
+</html>
